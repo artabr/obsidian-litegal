@@ -33,7 +33,16 @@ export default class LiteGallery extends Plugin {
 			
 			// Split the source into lines, remove brackets and whitespace, and filter out empty lines
 			const image_list = source.split('\n')
-				.map((line) => line.replace(/!?\[\[/, "").replace("]]", "").trim())
+				.map((line) => {
+					line = line.trim();
+					// Check for Markdown image syntax: ![alt](path)
+					const markdown_match = line.match(/!\[.*?\]\((.+?)\)/);
+					if (markdown_match) {
+						return markdown_match[1].trim();
+					}
+					// Check for wiki-link style: [[image]] or ![[image]]
+					return line.replace(/!?\[\[/, "").replace("]]", "").trim();
+				})
 				.filter((line) => line)
 				.map((image) => {
 					// If image is a URL (http/https) or a local file path, return it as is
